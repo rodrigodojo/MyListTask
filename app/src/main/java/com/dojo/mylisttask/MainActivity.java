@@ -1,6 +1,9 @@
 package com.dojo.mylisttask;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -40,7 +43,7 @@ public class MainActivity extends Activity {
         minhaLista.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                apagarTarefas(ids.get(position));
+                alertaApagaTarefa(position);
                 return false;
             }
         });
@@ -58,7 +61,6 @@ public class MainActivity extends Activity {
             bancoDados = openOrCreateDatabase("ToDoList", MODE_PRIVATE, null);
             bancoDados.execSQL("CREATE TABLE IF NOT EXISTS minhastabelas(id INTEGER PRIMARY KEY AUTOINCREMENT, tafera VARCHAR)");
 
-            //Cursor cursor = bancoDados.rawQuery("SELECT * FROM minhastabelas", null);
             Cursor cursor = bancoDados.rawQuery("SELECT * FROM minhastabelas ORDER BY id DESC", null);
 
             int indiceColunaID = cursor.getColumnIndex("id");
@@ -95,7 +97,6 @@ public class MainActivity extends Activity {
         }catch (Exception e){
             e.printStackTrace();
         }
-
     }
 
     private void apagarTarefas(Integer id){
@@ -107,4 +108,16 @@ public class MainActivity extends Activity {
             e.printStackTrace();
         }
     }
-}
+    
+    private void alertaApagaTarefa(Integer idSelecionado){
+        String tarefaSelecionada = itens.get(idSelecionado);
+        final Integer numeroId = idSelecionado;
+        new AlertDialog.Builder(MainActivity.this).setTitle("Aviso!").setMessage("Deseja apagar a tarefa : "+tarefaSelecionada+" ?").setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                apagarTarefas(ids.get(numeroId));
+            }
+        }).setNegativeButton("Não", null).show();
+        }
+    }
+
