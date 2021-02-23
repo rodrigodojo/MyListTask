@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -34,11 +35,19 @@ public class MainActivity extends Activity {
         meuBotao = findViewById(R.id.buttonit);
         minhaLista = findViewById(R.id.listView);
 
+        carregaTarefa();
+
+        minhaLista.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                apagarTarefas(ids.get(position));
+                return false;
+            }
+        });
+
         meuBotao.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                bancoDados = openOrCreateDatabase("ToDoList", MODE_PRIVATE, null);
-                bancoDados.execSQL("CREATE TABLE IF NOT EXISTS minhastabelas(id INTEGER PRIMARY KEY AUTOINCREMENT, tafera VARCHAR)");
                 adicionarNovaTarefa(meuTexto.getText().toString());
             }
         });
@@ -46,10 +55,12 @@ public class MainActivity extends Activity {
 
     private void carregaTarefa() {
         try {
-            //bancoDados = openOrCreateDatabase("ToDoList", MODE_PRIVATE, null);
-            //bancoDados.execSQL("CREATE TABLE IF NOT EXISTS minhastabelas(id INTEGER PRIMARY KEY AUTOINCREMENT, tafera VARCHAR)");
+            bancoDados = openOrCreateDatabase("ToDoList", MODE_PRIVATE, null);
+            bancoDados.execSQL("CREATE TABLE IF NOT EXISTS minhastabelas(id INTEGER PRIMARY KEY AUTOINCREMENT, tafera VARCHAR)");
 
-            Cursor cursor = bancoDados.rawQuery("SELECT * FROM minhastabelas", null);
+            //Cursor cursor = bancoDados.rawQuery("SELECT * FROM minhastabelas", null);
+            Cursor cursor = bancoDados.rawQuery("SELECT * FROM minhastabelas ORDER BY id DESC", null);
+
             int indiceColunaID = cursor.getColumnIndex("id");
             int indiceColunaTarefa = cursor.getColumnIndex("tafera");
 
@@ -87,7 +98,13 @@ public class MainActivity extends Activity {
 
     }
 
-    private void apagarTarefas(){
-
+    private void apagarTarefas(Integer id){
+        try{
+            bancoDados.execSQL("DELETE FROM minhastabelas WHERE id="+id);
+            Toast.makeText(MainActivity.this,"Tarefa Removida!",Toast.LENGTH_SHORT).show();
+            carregaTarefa();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
 }
